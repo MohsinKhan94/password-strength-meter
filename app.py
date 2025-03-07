@@ -8,6 +8,8 @@ import pyperclip
 # Store password history
 if "password_history" not in st.session_state:
     st.session_state["password_history"] = []
+if "password" not in st.session_state:
+    st.session_state["password"] = ""
 
 # Function to generate a strong password
 def generate_password(length=12, use_digits=True, use_special=True):
@@ -27,10 +29,6 @@ def check_password_strength(password):
 def get_strength_meter(score):
     colors = ["🔴 Very Weak", "🟠 Weak", "🟡 Moderate", "🟢 Strong", "💪 Very Strong"]
     return colors[score]
-
-# Function to copy password to clipboard
-def copy_to_clipboard(password):
-    pyperclip.copy(password)
 
 # Function to get password history in bytes format
 def get_password_history():
@@ -66,8 +64,10 @@ def main():
                 for suggestion in feedback['suggestions']:
                     st.write(f"- {suggestion}")
 
+    col1, col2 = st.columns([1, 1])
+
     # Generate Password Button
-    if st.button("🎲 Generate Password", use_container_width=True):
+    if col1.button("🎲 Generate Password", use_container_width=True):
         with st.spinner("Generating a secure password..."):
             time.sleep(1)
             password = generate_password(length, use_digits, use_special)
@@ -77,8 +77,14 @@ def main():
         if len(password) >= 16:
             st.balloons()
 
+    # Clear Password Button
+    if col2.button("🗑️ Clear Password", use_container_width=True):
+        st.session_state["password"] = ""
+        st.session_state["password_history"].clear()
+        st.experimental_rerun()
+
     # Display Generated Password
-    if "password" in st.session_state:
+    if st.session_state["password"]:
         st.markdown("### ✨ Your Secure Password:")
         st.text_input("🔑 Generated Password", value=st.session_state["password"], disabled=True)
 
@@ -87,7 +93,6 @@ def main():
            st.code(st.session_state["password"], language="text")
         st.markdown("Click the password above, select it, and copy it manually (Ctrl+C / Cmd+C).")
 
-        
         with col2:
             st.download_button("⬇️ Download Password History", get_password_history(), "password_history.txt", "text/plain")
 
