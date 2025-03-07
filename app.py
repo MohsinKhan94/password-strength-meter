@@ -20,7 +20,7 @@ def generate_password(length=12, use_digits=True, use_special=True):
 
 # Function to check password strength dynamically
 def check_password_strength(password):
-    result = zxcvbn.zxcvbn(password)
+    result = zxcvbn(password)
     return result['score'], result['feedback']
 
 # Function to style the strength meter with colors
