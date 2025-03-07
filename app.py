@@ -3,7 +3,6 @@ import secrets
 import string
 from zxcvbn import zxcvbn
 import time
-import pyperclip
 
 # Store password history
 if "password_history" not in st.session_state:
@@ -20,20 +19,19 @@ def generate_password(length=12, use_digits=True, use_special=True):
         characters += string.punctuation
     return ''.join(secrets.choice(characters) for _ in range(length))
 
-# Function to check password strength dynamically
+# Function to check password strength
 def check_password_strength(password):
     result = zxcvbn(password)
     return result['score'], result['feedback']
 
-# Function to style the strength meter with colors
+# Function to get strength label
 def get_strength_meter(score):
     colors = ["🔴 Very Weak", "🟠 Weak", "🟡 Moderate", "🟢 Strong", "💪 Very Strong"]
     return colors[score]
 
-# Function to get password history in bytes format
-def get_password_history():
-    history_text = "\n".join(st.session_state["password_history"])
-    return history_text.encode("utf-8")  # ✅ Convert to bytes format
+# Function to update session state for manual password input
+def update_password():
+    st.session_state["password"] = st.session_state["password_input"]
 
 # Main function
 def main():
@@ -50,9 +48,15 @@ def main():
     st.markdown("### Secure, Fun, and Interactive! 🚀")
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    # User Password Input for Live Strength Meter
-    password_input = st.text_input("🔐 Type or Generate a Password:", key="password_input")
+    # User Password Input (Handles Manual Typing)
+    password_input = st.text_input(
+        "🔐 Type or Generate a Password:", 
+        value=st.session_state["password"], 
+        key="password_input", 
+        on_change=update_password
+    )
 
+    # Check password strength
     if password_input:
         score, feedback = check_password_strength(password_input)
         strength_label = get_strength_meter(score)
@@ -72,6 +76,7 @@ def main():
             time.sleep(1)
             password = generate_password(length, use_digits, use_special)
             st.session_state["password"] = password
+            st.session_state["password_input"] = password  # ✅ Update input field
             st.session_state["password_history"].append(password)
 
         if len(password) >= 16:
@@ -80,20 +85,13 @@ def main():
     # Clear Password Button
     if col2.button("🗑️ Clear Password", use_container_width=True):
         st.session_state["password"] = ""
+        st.session_state["password_input"] = ""  # ✅ Clear input field
         st.session_state["password_history"] = []
 
-    # Display Generated Password
+    # Display Password
     if st.session_state["password"]:
         st.markdown("### ✨ Your Secure Password:")
         st.text_input("🔑 Generated Password", value=st.session_state["password"], disabled=True)
-
-        col1, col2 = st.columns([1, 1])
-        with col1:
-           st.code(st.session_state["password"], language="text")
-        st.markdown("Click the password above, select it, and copy it manually (Ctrl+C / Cmd+C).")
-
-        with col2:
-            st.download_button("⬇️ Download Password History", get_password_history(), "password_history.txt", "text/plain")
 
     # Sidebar: Security Tips
     st.sidebar.markdown("### 🔐 Pro Security Tips")
