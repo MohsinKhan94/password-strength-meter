@@ -4,13 +4,13 @@ import string
 from zxcvbn import zxcvbn
 import time
 
-# Store password history
+# Initialize session state variables
 if "password_history" not in st.session_state:
     st.session_state["password_history"] = []
 if "password" not in st.session_state:
     st.session_state["password"] = ""
 
-# Function to generate a strong password
+# Function to generate a password
 def generate_password(length=12, use_digits=True, use_special=True):
     characters = string.ascii_letters
     if use_digits:
@@ -29,9 +29,9 @@ def get_strength_meter(score):
     colors = ["🔴 Very Weak", "🟠 Weak", "🟡 Moderate", "🟢 Strong", "💪 Very Strong"]
     return colors[score]
 
-# Function to update session state for manual password input
-def update_password():
-    st.session_state["password"] = st.session_state["password_input"]
+# Function to reset password field
+def reset_password():
+    st.session_state["password"] = ""  # ✅ Reset password only
 
 # Main function
 def main():
@@ -52,15 +52,18 @@ def main():
     password_input = st.text_input(
         "🔐 Type or Generate a Password:", 
         value=st.session_state["password"], 
-        key="password_input", 
-        on_change=update_password
+        key="password_input"
     )
+
+    # Update session state when user types a password
+    if password_input != st.session_state["password"]:
+        st.session_state["password"] = password_input  # ✅ Proper session state update
 
     # Check password strength
     if password_input:
         score, feedback = check_password_strength(password_input)
         strength_label = get_strength_meter(score)
-        
+
         # Color-based strength feedback
         st.markdown(f"**Strength:** {strength_label}")
         if feedback['suggestions']:
@@ -74,19 +77,15 @@ def main():
     if col1.button("🎲 Generate Password", use_container_width=True):
         with st.spinner("Generating a secure password..."):
             time.sleep(1)
-            password = generate_password(length, use_digits, use_special)
-            st.session_state["password"] = password
-            st.session_state["password_input"] = password  # ✅ Update input field
-            st.session_state["password_history"].append(password)
+            new_password = generate_password(length, use_digits, use_special)
+            st.session_state["password"] = new_password  # ✅ Store generated password
 
-        if len(password) >= 16:
+        if len(new_password) >= 16:
             st.balloons()
 
     # Clear Password Button
-    if col2.button("🗑️ Clear Password", use_container_width=True):
-        st.session_state["password"] = ""
-        st.session_state["password_input"] = ""  # ✅ Clear input field
-        st.session_state["password_history"] = []
+    if col2.button("🗑️ Clear Password", use_container_width=True, on_click=reset_password):
+        pass  # ✅ This now resets the password safely
 
     # Display Password
     if st.session_state["password"]:
