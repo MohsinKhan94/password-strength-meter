@@ -38,9 +38,7 @@ def copy_password():
 
 # Function to reset everything
 def reset_app():
-    st.session_state["password"] = ""
-    st.session_state["password_input"] = ""
-    st.experimental_rerun()
+    st.session_state.clear()
 
 # Main function
 def main():
@@ -74,10 +72,11 @@ def main():
     if st.button("🎲 Generate Password"):
         with st.spinner("Generating a secure password..."):
             time.sleep(1)
-            st.session_state["password"] = generate_password(length, use_digits, use_special)
-            st.session_state["password_history"].append(st.session_state["password"])
+            new_password = generate_password(length, use_digits, use_special)
+            st.session_state["password"] = new_password
+            st.session_state["password_history"].append(new_password)
 
-        if len(st.session_state["password"]) >= 16:
+        if len(new_password) >= 16:
             st.balloons()
 
     # Display Generated Password
