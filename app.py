@@ -1,7 +1,7 @@
 import streamlit as st
 import secrets
 import string
-import zxcvbn
+from zxcvbn import zxcvbn
 import time
 import pyperclip
 
@@ -84,9 +84,9 @@ def main():
 
         col1, col2 = st.columns([1, 1])
         with col1:
-            if st.button("📋 Copy to Clipboard"):
-                copy_to_clipboard(st.session_state["password"])
-                st.success("Copied! ✅")
+           st.code(st.session_state["password"], language="text")
+        st.markdown("Click the password above, select it, and copy it manually (Ctrl+C / Cmd+C).")
+
         
         with col2:
             st.download_button("⬇️ Download Password History", get_password_history(), "password_history.txt", "text/plain")
