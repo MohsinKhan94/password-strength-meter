@@ -2,7 +2,6 @@ import streamlit as st
 import secrets
 import string
 import time
-import pyperclip
 from zxcvbn import zxcvbn
 
 # Store password history
@@ -31,10 +30,6 @@ def check_password_strength(password):
 def get_strength_meter(score):
     colors = ["🔴 Very Weak", "🟠 Weak", "🟡 Moderate", "🟢 Strong", "💪 Very Strong"]
     return colors[score]
-
-# Function to copy password to clipboard
-def copy_password():
-    pyperclip.copy(st.session_state["password"])
 
 # Function to reset everything
 def reset_app():
@@ -79,16 +74,16 @@ def main():
         if len(new_password) >= 16:
             st.balloons()
 
-    # Display Generated Password
+    # Display Generated Password with Copy Button
     if st.session_state["password"]:
         st.markdown("### ✨ Your Secure Password:")
-        st.text_input("🔑 Generated Password", value=st.session_state["password"], disabled=True)
+        
+        # Copy password using Streamlit's text_input (pyperclip is removed)
+        st.text_input("🔑 Generated Password", value=st.session_state["password"], key="copy_box", disabled=True)
         
         col1, col2 = st.columns([1, 1])
         with col1:
-            if st.button("📋 Copy to Clipboard"):
-                copy_password()
-                st.success("✅ Password copied!")
+            st.code(st.session_state["password"], language="plaintext")
 
         with col2:
             if st.button("❌ Reset"):
