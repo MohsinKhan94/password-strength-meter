@@ -80,8 +80,7 @@ def main():
     # Clear Password Button
     if col2.button("🗑️ Clear Password", use_container_width=True):
         st.session_state["password"] = ""
-        st.session_state["password_history"].clear()
-        st.experimental_rerun()
+        st.session_state["password_history"] = []
 
     # Display Generated Password
     if st.session_state["password"]:
